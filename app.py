@@ -46,8 +46,8 @@ db = SQLAlchemy(app)
 
 def import_content(filepath):
     mng_client = pymongo.MongoClient('localhost', 27017)
-    mng_db = mng_client['batter_stats_db'] // Replace mongo db name
-    stats_collection = 'stats_collection' // Replace mongo db collection name
+    mng_db = mng_client['batter_stats_db'] #Replace mongo db name
+    stats_collection = 'stats_collection' #Replace mongo db collection name
     db_cm = mng_db[stats_collection]
     cdir = os.path.dirname(__file__)
     file_res = os.path.join(cdir, filepath)
@@ -58,7 +58,7 @@ def import_content(filepath):
     db_cm.insert(data_json)
 
 if __name__ == "__main__":
-  filepath = '/db/' + filename  // pass csv file path
+  filepath = '/db/' + data  # pass csv file path
   import_content(filepath)
 
 @app.before_first_request
