@@ -13,6 +13,6 @@ Visualizations:
   
   Birthplace and compensation map. - Javier
   
-  Salary comparison over time adjusted for inflation.
+  Salary comparison over time adjusted for inflation. - Bryan
   
 Data Source: Data from Project 1 stored in sqlite.
