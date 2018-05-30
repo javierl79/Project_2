@@ -7,10 +7,13 @@ from flask import (
     redirect)
 
 import pymysql
+import decimal
 from flask_sqlalchemy import SQLAlchemy
+# from flask_mysql import MySQL
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, MetaData, func, inspect, Table
+from sqlalchemy.types import DECIMAL
 
 # from models import Value_Batting
 
@@ -18,6 +21,7 @@ import os
 import pandas as pd 
 import numpy as np 
 import plotly
+import requests
 
 
 
@@ -26,15 +30,21 @@ import plotly
 #################################################
 
 app = Flask(__name__)
-
+app.config["DEBUG"] = True
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 #################################################
 # Database Setup
 #################################################
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:tigers2@@6@localhost/baseball'
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:tigers2@@6@localhost/baseball'
+
+app.config["SQLALCHEMY_POOL_RECYCLE"] = 299
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False 
 
 db = SQLAlchemy(app)
+
+db.init_app(app)
 
 # engine = create_engine('mysql+pymysql://root:tigers2@@6@localhost/baseball')
 # metadata = MetaData(bind=engine)
@@ -48,15 +58,44 @@ class Batting_Advanced(db.Model):
     __table_args__ = {"autoload": True, "autoload_with": db.engine}
     __tablename__ = "advancedbatting"
 
-# class Batting_Value(db.Model):
-#     __table_args__ = {"autoload": True, "autoload_with": db.engine}
-#     __tablename__ = "valuebatting"
+class Batting_Value(db.Model):
+    __table_args__ = {"autoload": True, "autoload_with": db.engine}
+    __tablename__ = "valuebatting"
+
+class Salary_Info(db.Model):
+    __table_args__ = {"autoload": True, "autoload_with": db.engine}
+    __tablename__ = "salaries"
+
+class Player_Info(db.Model):
+    __table_args__ = {"autoload": True, "autoload_with": db.engine}
+    __tablename__ = "people"
+
+class CPI_Info(db.Model):
+    __table_args__ = {"autoload": True, "autoload_with": db.engine}
+    __tablename__ = "cpi_info"
+
+class Median_Income(db.Model):
+    __table_args__ = {"autoload": True, "autoload_with": db.engine}
+    __tablename__ = "real_median_hh_income"
 
 # db.create_all()
 
 #################################################
 # Flask Routes
 #################################################
+
+def column_names(tableClass):
+    names = map(lambda x: x.name, tableClass.__table__.columns)
+
+    return list(names)
+
+def get_data():
+    cur = db.cursor(pymysql.cursors.DictCursor)
+    cur.execute(sql)
+    sql_results=cur.fetchall()
+
+    cur.close()
+    return sql_results
 
 @app.before_first_request
 def setup():
@@ -84,41 +123,98 @@ def advanced_data():
     for record in data:
         advanced_dict = {}
         for col in Batting_Advanced.__table__.columns:
-            advanced_dict[col.name] = getattr(record, col.name)
+            d = getattr(record, col.name)
+            if isinstance(d, decimal.Decimal): d = float(d);
+            advanced_dict[col.name] = d
         advanced_data.append(advanced_dict)
-
     return jsonify(advanced_data)
 
-# @app.route("/api/value-batting-data/<value_batting>")
-# def value_data():
-#     value_data = []
-#     data = db.session.query(Player).all()
-#     for record in data:
-#         value_dict = {}
-#         value_data.append(value_dict)
+@app.route("/api/value-batting-data/<Player>")
+def value_data(Player):
+    value_data = []
+    data = db.session.query(Batting_Value).all()
+    for record in data:
+        value_dict = {}
+        for col in Batting_Value.__table__.columns:
+            d = getattr(record, col.name)
+            if isinstance(d, decimal.Decimal): d = float(d);
+            value_dict[col.name] = d
+        value_data.append(value_dict)
+
+    return jsonify(value_data)
+
+@app.route("/api/player-salaries")
+def salary_data():
+    salary_data = []
+    data = db.session.query(Salary_Info).all()
+    for record in data:
+        salary_dict = {}
+        for col in Salary_Info.__table__.columns:
+            d = getattr(record, col.name)
+            salary_dict[col.name] = d
+        salary_data.append(salary_dict)
+
+    return jsonify(salary_data)
+
+@app.route("/api/player-bios")
+def player_info():
+    player_info = []
+    data = db.session.query(Player_Info).all()
+    for record in data:
+        bio_dict = {}
+        for col in Player_Info.__table__.columns:
+            d = getattr(record, col.name)
+            if isinstance(d, decimal.Decimal): d = float(d);
+            bio_dict[col.name] = d
+        player_info.append(bio_dict)
+
+    return jsonify(player_info)
+
+@app.route("/api/median-income")
+def median_hh_income():
+    median_hh_income = []
+    data = db.session.query(Median_Income).all()
+    for record in data:
+        median_income_dict = {}
+        for col in Median_Income.__table__.columns:
+            d = getattr(record, col.name)
+            if isinstance(d, decimal.Decimal): d = float(d);
+            median_income_dict[col.name] = d
+        median_hh_income.append(median_income_dict)
+
+    return jsonify(median_hh_income)
+
+@app.route("/api/cpi-data")
+def cpi_data():
+    cpi_data = []
+    data = db.session.query(CPI_Info).all()
+    for record in data:
+        cpi_dict = {}
+        for col in CPI_Info.__table__.columns:
+            d = getattr(record, col.name)
+            if isinstance(d, decimal.Decimal): d = float(d);
+            cpi_dict[col.name] = d
+        cpi_data.append(cpi_dict)
+
+    return jsonify(cpi_data)
 
 
-    # value_data = []
-    # data = db.session.query(Batting_Value).all()
-    # for record in data:
-    #     value_dict = {}
-    #     for col in Batting_Value.__table__.columns:
-    #         value_dict[col.name] = getattr(record, col.name)
-    #     value_data.append(value_dict)
 
-    # return jsonify(value_data)
+@app.route("/stats")
+def stats():
+
+    return render_template("stats.html")
+
 
 @app.route("/")
 def home():
-    try:
-        db.session.query('1').from_statement('SELECT 1').all()
-        return '<h1>It works</h1>'
-    except:
-        return '<h1>Something is broken</h1>'
-	# return render_template("index.html")
+    # try:
+    #     db.session.query('1').from_statement('SELECT 1').all()
+    #     return '<h1>It works</h1>'
+    # except:
+    #     return '<h1>Something is broken</h1>'
+	return render_template("index.html")
 
-# @app.route("/stats")
-# def stats():
 
 if __name__ == "__main__":
 	app.run(debug=True)

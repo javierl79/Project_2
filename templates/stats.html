@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <title>Stats Plot</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="#">Hitting Visualizations</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample02" aria-controls="navbarsExample02" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="stat_type">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="./static/">Home <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="./static/">Geography</a>
+        </li>
+      </ul>
+      <form class="form-inline my-2 my-md-0">
+        <input class="form-control" type="text" placeholder="Enter Player Name">
+        <button class="btn btn-light">Submit</button>
+      </form>
+    </div>
+  </nav>
+    <!-- <div class="header" id="myHeader">
+        <h2>Baseball Hitting Visualizations</h2>
+    </div>
+    <div class="content"> -->
+  <br>
+
+  <div class="jumbotron">
+      <div class="col-sm-8 mx-auto">
+        <h1>
+          Baseball Hitting Statistic Visualizations
+        </h1>
+        <p>
+          Search by player, position, or team to view old school and new school statistical comparisons and visualizations. Statistical data was collected from "
+          <a href="https://www.fangraphs.com/">FANGRAPHS</a>
+        . Hopefully everything works...
+        </p>
+        <div>
+          <p class="font-italic" style="font-size:0.9em">'God could come down from heaven and he couldn't throw one past me.' -TED WILLIAMS.</p>
+        </div>
+        
+        <!-- <div style="margin-top:25px">
+          <img src="{{ url_for('static', filename='img/pool.svg') }}" alt="" style="width:100px">
+        </div> -->
+      </div>
+  </div>
+  <div class="options">
+    <div class="btn-group">
+      <button class="btn btn-secondary btn-lg dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Pick a Team
+      </button>
+      <div class="dropdown-menu" aria-labelledby="btn btn-secondary btn-lg dropdown-toggle">
+        <li class="dropdown-item" id="teams" href="#"</select>
+
+      </div>
+    </div>
+    <!-- <div class="btn-group">
+      <form class="form-inline my-2 my-md-0">
+        <input class="form-control" type="text" placeholder="Enter Player Name">
+        <button class="btn btn-light">Submit</button>
+      </form>
+    </div> -->
+        <!-- <label> Team: </label>
+        <input name="teamGroup" id="teams" placeholder="Enter a Team" list="teams">
+        <label> Player: </label>
+        <input name="hitter" id="hitters" placeholder="Enter Player Name" list="hitters">
+      </div>
+      <div class="info"></div>
+    </div> -->
+  </div>
+
+  <br>
+
+  <div id="bubble"></div>
+  <div class="viz">
+    <div class="container">
+      <svg width="600" height="600"></svg>
+    </div>
+  </div>
+  <script src={{ url_for( 'static', filename="logic02.js" ) }}></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+</body>
+
+</html>
