@@ -1,4 +1,7 @@
-import json
+import datetime as dt
+import numpy as np
+import pandas as pd
+
 from flask import (
     Flask,
     render_template,
@@ -6,83 +9,90 @@ from flask import (
     request,
     redirect)
 
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.ext.automap import automap_base
-from sqlalchemy.orm import Session
-from sqlalchemy import create_engine, func, inspect
-import pymongo
-
-import os
-import pandas as pd 
-import numpy as np 
-import plotly
-
-
-
 #################################################
 # Flask Setup
 #################################################
-
 app = Flask(__name__)
 
 #################################################
 # Database Setup
 #################################################
+from flask_sqlalchemy import SQLAlchemy
+# The database URI
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///db/battingStatsComplete.sqlite"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/battingStatsComplete.sqlite'
 db = SQLAlchemy(app)
 
+class Years(db.Model):
+    __tablename__ = 'players_cleaned'
+
+    id = db.Column(db.Integer, primary_key=True)
+    playerID = db.Column(db.String(64))
+    salary = db.Column(db.Integer)
+    birthCountry = db.Column(db.String(64))
+    birthState = db.Column(db.String(64))
+    yearID = db.Column(db.Integer)
+    birthYear = db.Column(db.Integer)
 
 
-# basedir = os.path.abspath(os.path.dirname(__file__))
+    def __repr__(self):
+        return '<Years %r>' % (self.playerID)
 
-# standardBatting = Base.classes.standard
-
-
+# Create database tables
+@app.before_first_request
+def setup():
+    # Recreate database each time for demo
+    #db.drop_all()
+    db.create_all()
 
 #################################################
 # Flask Routes
 #################################################
 
-def import_content(filepath):
-    mng_client = pymongo.MongoClient('localhost', 27017)
-    mng_db = mng_client['batter_stats_db'] #Replace mongo db name
-    stats_collection = 'stats_collection' #Replace mongo db collection name
-    db_cm = mng_db[stats_collection]
-    cdir = os.path.dirname(__file__)
-    file_res = os.path.join(cdir, filepath)
-
-    data = pd.read_csv(file_res)
-    data_json = json.loads(data.to_json(orient='records'))
-    db_cm.remove()
-    db_cm.insert(data_json)
-
-if __name__ == "__main__":
-  filepath = '/db/' + data  # pass csv file path
-  import_content(filepath)
-
-@app.before_first_request
-def setup():
-	db.drop_all()
-	db.create_all()
-
-@app.route("/api/batting-data")
-def batting_data():
-	df = pd.read_csv('db/standardBatting.csv')
-	df.to_sql(name = 'standardBatting', con=db.engine, index=False)
-	standard_stats = []
-	for player in session.query(df.Name).all():
-		standard_stats.append(player[0])
-
-	return jsonify(standard_stats)
-
-
 @app.route("/")
 def home():
-	return render_template("index.html")
+    """Render Home Page."""
+    return render_template("indexfinal.html")
 
-# @app.route("/stats")
-# def stats():
+@app.route("/state_char")
+def state_char():
+    """Return emoji score and emoji char"""
 
-if __name__ == "__main__":
-	app.run(debug=True)
+    # query for the top 10 emoji data
+    results = db.session.query(Years.birthState, Years.salary).\
+        order_by(Years.salary.desc()).all()
+
+    # Select the top 10 query results
+    birhtState = [result[0] for result in results]
+    salaries = [int(result[1]) for result in results]
+
+    # Generate the plot trace
+    plot_trace = {
+        "x": birhtState,
+        "y": salaries,
+        "type": "bar"
+    }
+    return jsonify(plot_trace)
+
+
+
+@app.route("/year_id")
+def year_char():
+    """Return emoji score and emoji id"""
+
+    #query for the emoji data using pandas
+    query_statement = db.session.query(Years).\
+    order_by(Years.yearID.asc()).statement
+    df = pd.read_sql_query(query_statement, db.session.bind)
+    
+     #Format the data for Plotly
+    plot_trace = {
+            "x": df["yearID"].values.tolist(),
+            "y": df["salary"].values.tolist(),
+            "type": "bar"
+    }
+    return jsonify(plot_trace)
+
+
+if __name__ == '__main__':
+    app.run(debug=True)

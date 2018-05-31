@@ -18,5 +18,42 @@
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<!--Javier's Code-->
+<div id="bar"></div>
+    <script>
+        
+        // Plot the default route once the page loads
+        var default_url = "/state_char";
+        Plotly.d3.json(default_url, function(error, response) {
+            if (error) return console.warn(error);
+            var data = [response];
+            var layout = { margin: { t: 30, b:100 } }
+            Plotly.plot("bar", data, layout)
+        })
+
+        // Update the plot with new data
+        function updatePlotly(newdata) {
+            var Bar = document.getElementById('bar');
+            Plotly.restyle(Bar, 'x', [newdata.x])
+            Plotly.restyle(Bar, 'y', [newdata.y])
+        }
+
+        // Get new data whenever the dropdown selection changes
+        function getData(route) {
+            console.log(route);
+            Plotly.d3.json(`/${route}`, function(error, data) {
+                console.log("newdata", data);
+                updatePlotly(data);
+            });
+        }
+    </script>
+
+    <select id="selDataset" onchange="getData(this.value)">
+        <option value="state_char">State</option>
+        <option value="year_id">Year</option>
+        
+    </select>
+
+
   </body>
 </html>
